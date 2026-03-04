@@ -24,6 +24,8 @@ def load_data():
     with open("courses_data.pkl", "rb") as f:
         df = pickle.load(f)
 
+    df = df.reset_index(drop=True)
+
     return df
 
 
@@ -37,22 +39,11 @@ df = load_data()
 @st.cache_resource
 def build_model(df):
 
-    text_data = (
-        df["course_name"]
-        + " "
-        + df["topic"]
-        + " "
-        + df["difficulty_level"]
-    )
-
     tfidf = TfidfVectorizer(stop_words="english")
 
-    tfidf_matrix = tfidf.fit_transform(text_data)
+    tfidf_matrix = tfidf.fit_transform(df["course_name"])
 
-    model = NearestNeighbors(
-        metric="cosine",
-        algorithm="brute"
-    )
+    model = NearestNeighbors(metric="cosine", algorithm="brute")
 
     model.fit(tfidf_matrix)
 
@@ -72,22 +63,14 @@ def recommend_courses(selected_course, top_n=5):
 
     distances, indices = model.kneighbors(
         tfidf_matrix[idx],
-        n_neighbors=min(top_n + 15, len(df))
+        n_neighbors=min(top_n + 10, len(df))
     )
 
     course_indices = indices.flatten()[1:]
 
     rec_df = df.iloc[course_indices].copy()
 
-    selected_topic = df.loc[idx, "topic"]
-
-    # prioritize same topic courses
-    topic_courses = rec_df[rec_df["topic"] == selected_topic]
-
-    if len(topic_courses) > 0:
-        rec_df = topic_courses
-
-    # ranking logic
+    # ranking
     scaler = MinMaxScaler()
 
     rec_df[['rating_norm','price_norm']] = scaler.fit_transform(
