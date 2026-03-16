@@ -68,7 +68,7 @@ def recommend_courses(selected_course, top_n=10):
 
 
 
-st.title("🎓 Course Recommendation System")
+st.title("Course Recommendation System")
 
 selected_course = st.selectbox(
     "Select a Course",
