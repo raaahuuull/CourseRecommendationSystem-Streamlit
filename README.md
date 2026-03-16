@@ -182,7 +182,7 @@ http://localhost:8501
 
 ---
 
-# 📸 Application Screenshots
+# Application Screenshots
 
 ### Course Selection Interface
 
